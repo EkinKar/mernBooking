@@ -1,8 +1,8 @@
-import axios from 'axios';
+import './login.scss';
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import styles from './login.module.css';
+import axios from 'axios';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -23,35 +23,39 @@ const Login = () => {
     dispatch({ type: 'LOGIN_START' });
     try {
       const res = await axios.post('/auth/login', credentials);
-      dispatch({ type: 'LOGIN_SUCCESS', payload: res.data.details });
-      navigate('/');
-    } catch (error) {
-      dispatch({ type: 'LOGIN_FAILURE', payload: error.response.data });
+      if (res.data.isAdmin) {
+        dispatch({ type: 'LOGIN_SUCCESS', payload: res.data.details });
+
+        navigate('/');
+      } else {
+        dispatch({
+          type: 'LOGIN_FAILURE',
+          payload: { message: 'You are not allowed!' },
+        });
+      }
+    } catch (err) {
+      dispatch({ type: 'LOGIN_FAILURE', payload: err.response.data });
     }
   };
 
   return (
-    <div className={styles.login}>
-      <div className={styles.lContainer}>
+    <div className="login">
+      <div className="lContainer">
         <input
-          className={styles.lInput}
-          onChange={handleChange}
           type="text"
           placeholder="username"
           id="username"
+          onChange={handleChange}
+          className="lInput"
         />
         <input
-          className={styles.lInput}
-          onChange={handleChange}
           type="password"
           placeholder="password"
           id="password"
+          onChange={handleChange}
+          className="lInput"
         />
-        <button
-          disabled={loading}
-          onClick={handleClick}
-          className={styles.lButton}
-        >
+        <button disabled={loading} onClick={handleClick} className="lButton">
           Login
         </button>
         {error && <span>{error.message}</span>}

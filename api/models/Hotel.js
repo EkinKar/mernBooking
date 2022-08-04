@@ -14,7 +14,7 @@ const HotelSchema = new Schema({
     type: String,
     required: true,
   },
-  adress: {
+  address: {
     type: String,
     required: true,
   },
