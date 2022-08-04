@@ -10,11 +10,13 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styles from './header.module.css';
 import { DateRange } from 'react-date-range';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { SearchContext } from '../../context/SearchContext';
+import { AuthContext } from '../../context/AuthContext';
 
 function Header({ type }) {
   const [destination, setDestination] = useState('');
@@ -28,7 +30,7 @@ function Header({ type }) {
   const navigate = useNavigate();
 
   const [openCalendar, setOpenCalendar] = useState(false);
-  const [date, setDate] = useState([
+  const [dates, setDates] = useState([
     {
       startDate: new Date(),
       endDate: new Date(),
@@ -46,8 +48,12 @@ function Header({ type }) {
     });
   };
 
+  const { dispatch } = useContext(SearchContext);
+  const { user } = useContext(AuthContext);
+
   const handleSearch = () => {
-    navigate('/hotels', { state: { destination, date, options } });
+    dispatch({ type: 'NEW_SEARCH', payload: { destination, dates, options } });
+    navigate('/hotels', { state: { destination, dates, options } });
   };
 
   return (
@@ -90,7 +96,11 @@ function Header({ type }) {
               Get rewarded for your travels - unlock instant savings of %10 or
               more with a free EkoBooking account
             </p>
-            <button className={styles.headerButton}>Sign in / Register</button>
+            {!user && (
+              <button className={styles.headerButton}>
+                Sign in / Register
+              </button>
+            )}
             <div className={styles.headerSearch}>
               <div className={styles.headerSearchItem}>
                 <FontAwesomeIcon icon={faBed} className={styles.headerIcon} />
@@ -109,16 +119,16 @@ function Header({ type }) {
                 <span
                   onClick={() => setOpenCalendar(!openCalendar)}
                   className={styles.headerSearchText}
-                >{`${format(date[0].startDate, 'MM/dd/yyyy')} to ${format(
-                  date[0].endDate,
+                >{`${format(dates[0].startDate, 'MM/dd/yyyy')} to ${format(
+                  dates[0].endDate,
                   'MM/dd/yyyy'
                 )}`}</span>
                 {openCalendar && (
                   <DateRange
                     editableDateInputs={true}
-                    onChange={(item) => setDate([item.selection])}
+                    onChange={(item) => setDates([item.selection])}
                     moveRangeOnFirstSelection={false}
-                    ranges={date}
+                    ranges={dates}
                     className={styles.date}
                     minDate={new Date()}
                   />
